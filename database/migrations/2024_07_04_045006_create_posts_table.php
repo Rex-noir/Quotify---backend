@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('author')->nullable();
             $table->string('source')->nullable();
             $table->enum('status', PostStatus::all())->default('approved');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
