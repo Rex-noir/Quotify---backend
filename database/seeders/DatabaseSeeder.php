@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Like;
+use App\Models\Post;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -19,5 +21,9 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+
+        User::factory(10)->has(Post::factory(4))->create();
+        $this->call(LikeSeeder::class);
+        $this->call(TagSeeder::class);
     }
 }
