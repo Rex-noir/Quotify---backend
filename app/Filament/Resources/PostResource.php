@@ -8,7 +8,7 @@ use App\Filament\Resources\PostResource\RelationManagers\CommentsRelationManager
 use App\Filament\Resources\PostResource\RelationManagers\UserRelationManager;
 use App\Filament\Resources\PostResource\RelationManagers\UsersRelationManager;
 use App\Models\Post;
-use App\PostStatus;
+use App\Enums\PostStatus;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -74,7 +74,6 @@ class PostResource extends Resource
         return [
             //
             CommentsRelationManager::class,
-            UserRelationManager::class,
         ];
     }
 
