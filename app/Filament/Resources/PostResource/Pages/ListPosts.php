@@ -4,7 +4,7 @@ namespace App\Filament\Resources\PostResource\Pages;
 
 use App\Filament\Resources\PostResource;
 use App\Models\Post;
-use App\PostStatus;
+use App\Enums\PostStatus;
 use Filament\Actions;
 use Filament\Resources\Components\Tab;
 use Illuminate\Database\Eloquent\Builder;

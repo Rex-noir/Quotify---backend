@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\UserResource\RelationManagers;
 
-use App\PostStatus;
+use App\Enums\PostStatus;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
