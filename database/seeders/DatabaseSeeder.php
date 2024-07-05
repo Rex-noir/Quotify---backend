@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\Roles;
 use App\Models\Like;
 use App\Models\Post;
 use App\Models\User;
@@ -17,12 +18,14 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
+        $this->call(RoleSeeder::class);
+
+        User::factory()->withRole(Roles::SUPER_ADMIN)->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
 
-        User::factory(10)->has(Post::factory(4))->create();
+        User::factory(10)->has(Post::factory(4))->withRole(Roles::USER)->create();
         $this->call(LikeSeeder::class);
         $this->call(TagSeeder::class);
     }
