@@ -8,6 +8,7 @@ enum Roles: string
     case ADMIN = 'admin';
     case MODERATOR = 'moderator';
     case SUPER_ADMIN = 'super admin';
+    case BANNED = 'banned';
 
     public function label(): string
     {
@@ -16,6 +17,7 @@ enum Roles: string
             static::ADMIN => 'Admin',
             static::MODERATOR => 'Moderator',
             static::SUPER_ADMIN => 'Super Admin',
+            static::BANNED => 'Banned',
         };
     }
 }
