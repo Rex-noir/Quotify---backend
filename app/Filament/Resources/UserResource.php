@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\Roles;
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
 use App\Filament\Resources\UserResource\RelationManagers\PostsRelationManager;
@@ -39,6 +40,19 @@ class UserResource extends Resource
                     ->password()
                     ->required()
                     ->maxLength(255),
+                Forms\Components\Select::make('roles')
+                    ->multiple(true)->native(false)
+                    ->options(collect(Roles::cases())
+                        ->mapWithKeys(function ($role) {
+                            return [$role->value => $role->label()];
+                        })->toArray())
+                    ->preload()
+                    ->required()
+                    ->afterStateHydrated(function ($component, $state, $record) {
+                        if ($record) {
+                            $component->state($record->roles->pluck('name')->toArray());
+                        }
+                    }),
             ]);
     }
 
@@ -47,6 +61,10 @@ class UserResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('roles')->label('Role')->getStateUsing(function (User $record) {
+                    return $record->roles->pluck('name')->join(', ');
+                })
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
                     ->searchable(),
