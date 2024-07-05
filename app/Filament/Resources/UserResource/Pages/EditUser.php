@@ -18,4 +18,18 @@ class EditUser extends EditRecord
             Actions\RestoreAction::make(),
         ];
     }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        // Store the roles separately
+        $roles = $data['roles'];
+        unset($data['roles']);
+
+        // After saving the record, sync the roles
+        $this->record->fill($data);
+        $this->record->save();
+        $this->record->syncRoles($roles);
+
+        return $data;
+    }
 }
