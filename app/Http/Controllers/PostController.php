@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\PostCollection;
 use App\Models\Post;
 use Illuminate\Http\Request;
 
@@ -27,7 +26,7 @@ class PostController extends Controller
             ->orderByDesc('created_at')
             ->paginate(20);
 
-        return response()->json($posts);
+        return response($posts);
     }
 
     /**
