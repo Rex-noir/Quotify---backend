@@ -81,7 +81,7 @@ class CommentResource extends Resource
     {
         return [
             //
-            // ParentRelationManager::class,
+            ParentRelationManager::class,
             RepliesRelationManager::class
         ];
     }
