@@ -4,6 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\CommentResource\Pages;
 use App\Filament\Resources\CommentResource\RelationManagers;
+use App\Filament\Resources\CommentResource\RelationManagers\ParentRelationManager;
+use App\Filament\Resources\CommentResource\RelationManagers\RepliesRelationManager;
 use App\Models\Comment;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -79,6 +81,8 @@ class CommentResource extends Resource
     {
         return [
             //
+            // ParentRelationManager::class,
+            RepliesRelationManager::class
         ];
     }
 
