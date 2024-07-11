@@ -51,6 +51,13 @@ class PostController extends Controller
     public function show(string $id)
     {
         //
+        $post = Post::query()->where('id', $id)->with('user')->first();
+
+        if (!$post) {
+            return response(['message' => 'Post not found'], 404);
+        }
+
+        return $post;
     }
 
     /**
