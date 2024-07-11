@@ -9,7 +9,7 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::resource('/posts', PostController::class);
+Route::apiResource('/posts', PostController::class);
 
 Route::prefix('/auth')->group(function () {
     Route::post('/verify', [AuthController::class, 'verify']);
