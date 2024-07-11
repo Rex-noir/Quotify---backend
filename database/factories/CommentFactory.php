@@ -23,6 +23,7 @@ class CommentFactory extends Factory
             'user_id' => User::factory(),
             'content' => fake()->paragraph(),
             'gif_url' => fake()->imageUrl(480, 480, 'cats', true, 'Comment'),
+            'parent_id' => null
         ];
     }
 }

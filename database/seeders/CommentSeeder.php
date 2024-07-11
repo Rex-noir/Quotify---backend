@@ -18,7 +18,9 @@ class CommentSeeder extends Seeder
         $posts = Post::all();
 
         foreach ($posts as $post) {
-            Comment::factory()->for($post)->create();
+            $comment = Comment::factory()->for($post)->create();
+
+            Comment::factory()->for($post)->count(3)->create(['parent_id' => $comment->id]);
         }
     }
 }

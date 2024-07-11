@@ -28,5 +28,7 @@ class DatabaseSeeder extends Seeder
         User::factory(10)->has(Post::factory(4))->withRole(Roles::USER)->create();
         $this->call(LikeSeeder::class);
         $this->call(TagSeeder::class);
+        $this->call(CommentSeeder::class);
+        $this->call(CommentLikeSeeder::class);
     }
 }
