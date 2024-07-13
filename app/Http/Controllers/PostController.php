@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Comment;
 use App\Models\Post;
 use Illuminate\Http\Request;
 
@@ -12,19 +13,25 @@ class PostController extends Controller
      */
     public function index()
     {
-        //
+
         $posts = Post::with('user')
             ->withCount([
-                'likes as likes_count' => function ($query) {
-                    $query->where('is_like', true);
-                },
-                'disLikes as dislikes_count' => function ($query) {
-                    $query->where('is_like', false);
-                },
-                'comments as comments_count'
+                'likes as likes_count',
+                'disLikes as dislikes_count',
+                'comments'
             ])
-            ->orderByDesc('created_at')
+            ->orderByDesc('id')
             ->paginate(20);
+
+        ($posts->getCollection()->transform(function ($post) {
+            $comments = $post->comments()->withCount('likes as comment_likes_count')
+                ->orderByDesc('comment_likes_count')
+                ->latest()
+                ->take(2)
+                ->get();
+            $post->setRelation('comments', $comments);
+            return $post;
+        }));
 
         return response($posts);
     }
@@ -51,12 +58,18 @@ class PostController extends Controller
     public function show(string $id)
     {
         //
-        $post = Post::query()->where('id', $id)->with('user')->first();
+        $post = Post::query()->where('id', $id)
+            ->with(['user'])
+            ->withCount([
+                'likes',
+                'dislikes',
+                'comments'
+            ])
+            ->first();
 
         if (!$post) {
             return response(['message' => 'Post not found'], 404);
         }
-
         return $post;
     }
 
@@ -82,5 +95,22 @@ class PostController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function comments(string $id)
+    {
+
+        $comments = Comment::where([
+            'post_id' => $id, 'parent_id' => null
+        ])->with(['user',])
+            ->withCount(['likes as likes_count', 'dislikes as dislikes_count'])
+            ->paginate(10);
+
+
+        foreach ($comments as $comment) {
+            $comment->replies_count = $comment->repliesCount();
+        }
+
+        return $comments;
     }
 }
