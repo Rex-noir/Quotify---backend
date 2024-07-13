@@ -29,7 +29,16 @@ class Comment extends Model
 
     public function replies(): HasMany
     {
-        return $this->hasMany(Comment::class, 'parent_id')->orderby('created_at', 'asc');
+        return $this->hasMany(Comment::class, 'parent_id')
+            ->with(['user'])
+            ->withCount(['likes as likes_count', 'dislikes as dislikes_count',])
+            ->orderby('created_at', 'asc');
+    }
+
+
+    public function repliesCount(): int
+    {
+        return $this->replies()->count();
     }
 
     public function likes(): HasMany
@@ -37,7 +46,7 @@ class Comment extends Model
         return $this->hasMany(CommentLike::class)->where('is_like', true);
     }
 
-    public function disLikes(): HasMany
+    public function dislikes(): HasMany
     {
         return $this->hasMany(CommentLike::class)->where('is_like', false);
     }
