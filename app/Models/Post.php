@@ -26,7 +26,7 @@ class Post extends Model
         return $this->hasMany(Like::class)->where('is_like', true);
     }
 
-    public function disLikes(): HasMany
+    public function dislikes(): HasMany
     {
         return $this->hasMany(Like::class)->where('is_like', false);
     }
