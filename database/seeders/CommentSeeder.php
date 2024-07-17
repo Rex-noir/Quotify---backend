@@ -14,25 +14,39 @@ class CommentSeeder extends Seeder
      */
     public function run(): void
     {
-        $posts = Post::all();
+        // Fetch all posts in chunks to handle large data sets efficiently
+        Post::chunk(5, function ($posts) {
+            foreach ($posts as $post) {
+                // Create an initial comment for the post
+                $initialComments = Comment::factory()->count(5)->for($post)->create();
 
-        foreach ($posts as $post) {
-
-            $comment = Comment::factory()->for($post)->create();
-            $another = Comment::factory(3)->for($post)->create();
-
-            $level1Replies = Comment::factory()->for($post)->count(2)->create(['parent_id' => $comment->id]);
-
-            foreach ($level1Replies as $level1Reply) {
-                $level2Replies = Comment::factory()->for($post)->count(2)->create(['parent_id' => $level1Reply->id]);
-
-                foreach ($level2Replies as $level2Reply) {
-                    $replies =   Comment::factory()->for($post)->count(10)->create(['parent_id' => $level2Reply->id]);
-                    foreach ($replies as $level3Reply) {
-                        $replies =   Comment::factory()->for($post)->count(2)->create(['parent_id' => $level3Reply->id]);
-                    }
+                // For each initial comment, create replies
+                foreach ($initialComments as $comment) {
+                    $this->createReplies($post, $comment, 3);
                 }
             }
+        });
+    }
+
+    /**
+     * Recursive function to create replies for a comment.
+     *
+     * @param Post $post
+     * @param Comment $comment
+     * @param int $depth
+     */
+    protected function createReplies(Post $post, Comment $comment, int $depth)
+    {
+        if ($depth <= 0) {
+            return;
+        }
+
+        // Create a number of replies for the given comment
+        $replies = Comment::factory()->count(5)->for($post)->create(['parent_id' => $comment->id]);
+
+        foreach ($replies as $reply) {
+            // Recursively create replies for each reply
+            $this->createReplies($post, $reply, $depth - 1);
         }
     }
 }
