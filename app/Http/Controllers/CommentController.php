@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\CommentAdded;
 use App\Models\Comment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class CommentController extends Controller
 {
@@ -34,6 +36,21 @@ class CommentController extends Controller
     public function store(Request $request)
     {
         //
+        $validated = $request->validate([
+            'content' => 'required',
+            'post_id' => 'required|integer',
+            'parent_id' => 'integer|nullable'
+        ]);
+
+        $comment = Comment::create([
+            'content' => $validated['content'],
+            'post_id' => $validated['post_id'],
+            'parent_id' => $validated['parent_id'] ?? null,
+            'user_id' => Auth::user()->id,
+        ]);
+
+        CommentAdded::dispatch($comment);
+        return response([], 201);
     }
 
     /**
@@ -43,6 +60,7 @@ class CommentController extends Controller
     {
         //
         $comment = Comment::with(['user',])->findOrFail($id);
+        $comment->replies_count = $comment->repliesCount();
         return $comment;
     }
 
