@@ -16,6 +16,8 @@ class Post extends Model
     protected $fillable = ['user_id', 'title', 'quote', 'author', 'source', 'status',];
 
 
+    protected $appends = ['is_liked_by_user', 'is_disliked_by_user', 'top_comments'];
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -39,5 +41,33 @@ class Post extends Model
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class);
+    }
+
+    public function getIsLikedByUserAttribute()
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return false;
+        }
+
+        return $this->likes()->where('user_id', $user->id)->exists();
+    }
+
+    public function getIsDislikedByUserAttribute()
+    {
+        $authUser = auth()->user();
+        if (!$authUser) {
+            return false;
+        }
+        return $this->dislikes()->where('user_id', $authUser->id)->exists();;
+    }
+
+    public function getTopCommentsAttribute()
+    {
+        return $this->comments()->withCount('likes as comment_likes_count')
+            ->orderByDesc('comment_likes_count')
+            ->latest()
+            ->take(2)
+            ->get();
     }
 }
