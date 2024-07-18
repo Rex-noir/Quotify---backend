@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Comment;
 use App\Models\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
@@ -13,7 +14,6 @@ class PostController extends Controller
      */
     public function index()
     {
-
         $posts = Post::with('user')
             ->withCount([
                 'likes as likes_count',
@@ -23,15 +23,15 @@ class PostController extends Controller
             ->orderByDesc('id')
             ->paginate(20);
 
-        ($posts->getCollection()->transform(function ($post) {
-            $comments = $post->comments()->withCount('likes as comment_likes_count')
-                ->orderByDesc('comment_likes_count')
-                ->latest()
-                ->take(2)
-                ->get();
-            $post->setRelation('comments', $comments);
-            return $post;
-        }));
+        // ($posts->getCollection()->transform(function ($post) {
+        //     $comments = $post->comments()->withCount('likes as comment_likes_count')
+        //         ->orderByDesc('comment_likes_count')
+        //         ->latest()
+        //         ->take(2)
+        //         ->get();
+        //     $post->setRelation('comments', $comments);
+        //     return $post;
+        // }));
 
         return response($posts);
     }
