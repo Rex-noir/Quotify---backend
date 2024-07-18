@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Listeners\CommentEventSubscriber;
 use App\Listeners\PostEventsSubscriber;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
@@ -23,5 +24,6 @@ class AppServiceProvider extends ServiceProvider
     {
         //
         Event::subscribe(PostEventsSubscriber::class);
+        Event::subscribe(CommentEventSubscriber::class);
     }
 }
