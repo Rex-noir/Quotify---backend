@@ -10,6 +10,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Comment extends Model
 {
     protected $fillable = ['post_id', 'user_id', 'content', 'gif_url', 'parent_id'];
+
+    protected $appends = ['is_liked_by_user', 'is_disliked_by_user'];
+
     use HasFactory;
 
     public function user(): BelongsTo
@@ -49,5 +52,22 @@ class Comment extends Model
     public function dislikes(): HasMany
     {
         return $this->hasMany(CommentLike::class)->where('is_like', false);
+    }
+
+    public function getIsLikedByUserAttribute()
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return;
+        };
+        return $this->likes()->where('user_id', $user->id)->exists();
+    }
+    public function getIsDislikedByUserAttribute()
+    {
+        $user = auth()->user();
+        if (!$user) {
+            return;
+        };
+        return $this->dislikes()->where('user_id', $user->id)->exists();
     }
 }
