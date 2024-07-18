@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\LikeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -16,7 +17,14 @@ Route::apiResource('/users', UserController::class);
 
 //Posts
 Route::apiResource('/posts', PostController::class);
-Route::get('/posts/{post}/comments', [PostController::class, 'comments']);
+Route::prefix('/posts')->group(function () {
+    //Gets
+    Route::get('/{post}/comments', [PostController::class, 'comments']);
+
+    //Posts
+    Route::post('/{post}/like', [LikeController::class, 'likePost']);
+    Route::post('/{post}/dislike', [LikeController::class, 'dislikePost']);
+});
 
 //Comments
 Route::apiResource('/comments', CommentController::class);
