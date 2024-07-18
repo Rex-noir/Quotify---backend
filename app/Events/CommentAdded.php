@@ -34,7 +34,7 @@ class CommentAdded implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new Channel('posts'),
+            new Channel('comments'),
         ];
     }
 }
