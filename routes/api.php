@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\CommentLikeController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\UserController;
@@ -28,7 +29,15 @@ Route::prefix('/posts')->group(function () {
 
 //Comments
 Route::apiResource('/comments', CommentController::class);
-Route::get('/comments/replies/{comment}', [CommentController::class, 'replies']);
+Route::prefix('/comments')->group(function () {
+    //Gets
+    Route::get('/replies/{comment}', [CommentController::class, 'replies']);
+
+    //Posts
+    Route::post('/{post}/like', [CommentLikeController::class, 'likeComment']);
+    Route::post('/{post}/dislike', [CommentLikeController::class, 'dislikeComment']);
+});
+
 
 Route::prefix('/auth')->group(function () {
     Route::post('/verify', [AuthController::class, 'verify']);
