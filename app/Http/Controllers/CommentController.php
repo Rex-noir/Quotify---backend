@@ -49,8 +49,8 @@ class CommentController extends Controller
             'user_id' => Auth::user()->id,
         ]);
 
-        CommentAdded::dispatch($comment);
-        return response([], 201);
+        broadcast(new  CommentAdded($comment))->toOthers();
+        return response(['comment' => $comment]);
     }
 
     /**
