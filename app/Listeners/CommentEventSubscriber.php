@@ -19,7 +19,7 @@ class CommentEventSubscriber
         if ($comment && isset($comment->parent_id)) {
             $parentComment = Comment::findOrFail($comment['parent_id']);
             $updates = ['replies_count' => $parentComment->replies()->count(), 'id' => $comment['parent_id'], 'post_id' => $comment['post_id']];
-            event(new CommentUpdated($updates));
+            broadcast(new CommentUpdated($updates))->toOthers();
         }
     }
 
