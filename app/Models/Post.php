@@ -65,6 +65,7 @@ class Post extends Model
     public function getTopCommentsAttribute()
     {
         return $this->comments()->withCount('likes as comment_likes_count')
+        ->having('comment_likes_count','>',0)
             ->orderByDesc('comment_likes_count')
             ->latest()
             ->take(2)
