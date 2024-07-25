@@ -14,10 +14,10 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::with('user')
+        $posts = Post::with('user','likes','dislikes')
             ->withCount([
-                'likes as likes_count',
-                'disLikes as dislikes_count',
+                'likes',
+                'dislikes',
                 'comments'
             ])
             ->orderByDesc('id')
@@ -59,7 +59,7 @@ class PostController extends Controller
     {
         //
         $post = Post::query()->where('id', $id)
-            ->with(['user'])
+            ->with(['user',])
             ->withCount([
                 'likes',
                 'dislikes',
@@ -101,15 +101,11 @@ class PostController extends Controller
     {
 
         $comments = Comment::where([
-            'post_id' => $id, 'parent_id' => null
+            'post_id' => $id, 
+            'parent_id' => null
         ])->with(['user',])
-            ->withCount(['likes as likes_count', 'dislikes as dislikes_count'])
+            ->withCount(['likes', 'dislikes','replies'])
             ->paginate(10);
-
-
-        foreach ($comments as $comment) {
-            $comment->replies_count = $comment->repliesCount();
-        }
 
         return $comments;
     }
