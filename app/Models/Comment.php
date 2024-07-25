@@ -11,7 +11,7 @@ class Comment extends Model
 {
     protected $fillable = ['post_id', 'user_id', 'content', 'gif_url', 'parent_id'];
 
-    protected $appends = ['is_liked_by_user', 'is_disliked_by_user'];
+    protected $appends = ['is_liked_by_user', 'is_disliked_by_user',];
 
     use HasFactory;
 
@@ -34,14 +34,7 @@ class Comment extends Model
     {
         return $this->hasMany(Comment::class, 'parent_id')
             ->with(['user'])
-            ->withCount(['likes as likes_count', 'dislikes as dislikes_count',])
             ->orderby('created_at', 'asc');
-    }
-
-
-    public function repliesCount(): int
-    {
-        return $this->replies()->count();
     }
 
     public function likes(): HasMany
@@ -58,16 +51,22 @@ class Comment extends Model
     {
         $user = auth()->user();
         if (!$user) {
-            return;
-        };
-        return $this->likes()->where('user_id', $user->id)->exists();
+            return false;
+        }
+        return $this->relationLoaded('likes') 
+            ? $this->likes->contains('user_id', $user->id)
+            : $this->likes()->where('user_id', $user->id)->exists();
     }
+    
     public function getIsDislikedByUserAttribute()
     {
         $user = auth()->user();
         if (!$user) {
-            return;
-        };
-        return $this->dislikes()->where('user_id', $user->id)->exists();
+            return false;
+        }
+        return $this->relationLoaded('dislikes')
+        ? $this->dislikes->contains('user_id',$user->id)
+        : $this->dislikes()->where('user_id',$user->id)->exists();
     }
+
 }
