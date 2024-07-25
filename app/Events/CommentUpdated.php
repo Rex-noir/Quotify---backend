@@ -13,16 +13,14 @@ class CommentUpdated implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $public;
-    public $private;
+    public $updates;
     /**
      * Create a new event instance.
      */
-    public function __construct($public, $private = null)
+    public function __construct($updates)
     {
         //
-        $this->private = $private;
-        $this->public = $public;
+        $this->updates = $updates;
     }
 
     /**
