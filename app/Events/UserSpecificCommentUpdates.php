@@ -4,12 +4,14 @@ namespace App\Events;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Broadcasting\PresenceChannel;
+use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Auth;
 
-
-class CommentUpdated implements ShouldBroadcastNow
+class UserSpecificCommentUpdates implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -20,7 +22,7 @@ class CommentUpdated implements ShouldBroadcastNow
     public function __construct($updates)
     {
         //
-        $this->updates = $updates;
+        $this->updates  = $updates;
     }
 
     /**
@@ -31,7 +33,7 @@ class CommentUpdated implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new Channel('comments'),
+            new PrivateChannel('App.Models.User.' . Auth::id()),
         ];
     }
 }

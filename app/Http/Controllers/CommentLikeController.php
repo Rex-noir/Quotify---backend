@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\CommentUpdated;
+use App\Events\UserSpecificCommentUpdates;
 use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,7 +15,7 @@ class CommentLikeController extends Controller
         $comment = Comment::findOrFail($id);
         $user = Auth::user();
 
-        $public = ['post_id' => $comment->post_id, 'id' => $comment->id,];
+        $updates = ['post_id' => $comment->post_id, 'id' => $comment->id,];
 
         $existingLike = $comment->likes()->where('user_id', $user->id)->first();
         $existingDislike = $comment->dislikes()->where('user_id', $user->id)->first();
@@ -33,14 +34,12 @@ class CommentLikeController extends Controller
             $isLiked = true;
         }
 
-        $isDisliked = false; // After liking, user cannot have disliked the comment
+        $isDisliked = false;
 
-        // Get the updated counts
         $likesCount = $comment->likes()->count();
         $dislikesCount = $comment->dislikes()->count();
 
-        // Prepare event data
-        $public = array_merge($public, [
+        $updates = array_merge($updates, [
             'likes_count' => $likesCount,
             'dislikes_count' => $dislikesCount,
         ]);
@@ -48,13 +47,16 @@ class CommentLikeController extends Controller
         $private = [
             'is_liked_by_user' => $isLiked,
             'is_disliked_by_user' => $isDisliked,
-            'user_id'=>$user->id,
+            'post_id' => $comment->post_id,
+            'id' => $comment->id,
         ];
 
-        // Broadcast the updated data
-        broadcast(new CommentUpdated($public, $private));
+        broadcast(new CommentUpdated($updates));
 
-        // Return the updated data
+        if (Auth::check()) {
+            broadcast(new UserSpecificCommentUpdates($private));
+        }
+
         return response(204);
     }
 
@@ -63,7 +65,7 @@ class CommentLikeController extends Controller
         $comment = Comment::findOrFail($id);
         $user = Auth::user();
 
-        $public = ['post_id' => $comment->post_id, 'id' => $comment->id,];
+        $updates = ['post_id' => $comment->post_id, 'id' => $comment->id,];
 
         $existingLike = $comment->likes()->where('user_id', $user->id)->first();
         $existingDislike = $comment->dislikes()->where('user_id', $user->id)->first();
@@ -85,14 +87,12 @@ class CommentLikeController extends Controller
             $isDisliked = true;
         }
 
-        $isLiked = false; // After disliking, user cannot have liked the comment
+        $isLiked = false;
 
-        // Get the updated counts
         $likesCount = $comment->likes()->count();
         $dislikesCount = $comment->dislikes()->count();
 
-        // Prepare event data
-        $public = array_merge($public, [
+        $updates = array_merge($updates, [
             'likes_count' => $likesCount,
             'dislikes_count' => $dislikesCount,
         ]);
@@ -100,13 +100,16 @@ class CommentLikeController extends Controller
         $private = [
             'is_liked_by_user' => $isLiked,
             'is_disliked_by_user' => $isDisliked,
-            'user_id'=>$user->id,
+            'post_id' => $comment->post_id,
+            'id' => $comment->id,
         ];
 
-        // Broadcast the updated data
-        broadcast(new CommentUpdated($public, $private));
+        broadcast(new CommentUpdated($updates));
 
-        // Return the updated data
+        if (Auth::check()) {
+            broadcast(new UserSpecificCommentUpdates($private));
+        }
+
         return response(204);
     }
 }
