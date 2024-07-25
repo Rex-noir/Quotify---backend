@@ -2,49 +2,68 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\CommentLikeDislikeClicked;
+use App\Events\CommentUpdated;
 use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class CommentLikeController extends Controller
 {
-    //
     public function likeComment(Request $request, $id)
     {
         $comment = Comment::findOrFail($id);
         $user = Auth::user();
 
+        $public = ['post_id' => $comment->post_id, 'id' => $comment->id,];
+
         $existingLike = $comment->likes()->where('user_id', $user->id)->first();
         $existingDislike = $comment->dislikes()->where('user_id', $user->id)->first();
 
         if ($existingLike) {
-            // If the user already liked the comment, remove the like
             $existingLike->delete();
-            $eventData = ['is_like' => false, 'is_dislike' => false];
+            $isLiked = false;
         } else {
-            // If the user has disliked the comment, remove the dislike first
             if ($existingDislike) {
                 $existingDislike->delete();
             }
-            // Create a new like
             $comment->likes()->create([
                 'user_id' => $user->id,
                 'is_like' => true,
             ]);
-
-            $eventData = (['is_like' => true, 'is_dislike' => false]);
+            $isLiked = true;
         }
 
-        CommentLikeDislikeClicked::dispatch($eventData, $comment->id);
+        $isDisliked = false; // After liking, user cannot have disliked the comment
 
-        return response()->noContent();
+        // Get the updated counts
+        $likesCount = $comment->likes()->count();
+        $dislikesCount = $comment->dislikes()->count();
+
+        // Prepare event data
+        $public = array_merge($public, [
+            'likes_count' => $likesCount,
+            'dislikes_count' => $dislikesCount,
+        ]);
+
+        $private = [
+            'is_liked_by_user' => $isLiked,
+            'is_disliked_by_user' => $isDisliked,
+            'user_id'=>$user->id,
+        ];
+
+        // Broadcast the updated data
+        broadcast(new CommentUpdated($public, $private));
+
+        // Return the updated data
+        return response(204);
     }
 
     public function dislikeComment(Request $request, $id)
     {
-        $comment = comment::findOrFail($id);
+        $comment = Comment::findOrFail($id);
         $user = Auth::user();
+
+        $public = ['post_id' => $comment->post_id, 'id' => $comment->id,];
 
         $existingLike = $comment->likes()->where('user_id', $user->id)->first();
         $existingDislike = $comment->dislikes()->where('user_id', $user->id)->first();
@@ -52,7 +71,7 @@ class CommentLikeController extends Controller
         if ($existingDislike) {
             // If the user already disliked the comment, remove the dislike
             $existingDislike->delete();
-            $eventData = ['is_like' => false, 'is_dislike' => false];
+            $isDisliked = false;
         } else {
             // If the user has liked the comment, remove the like first
             if ($existingLike) {
@@ -63,11 +82,31 @@ class CommentLikeController extends Controller
                 'user_id' => $user->id,
                 'is_like' => false,
             ]);
-            $eventData = ['is_like' => false, 'is_dislike' => true];
+            $isDisliked = true;
         }
 
-        CommentLikeDislikeClicked::dispatch($eventData, $comment->id);
+        $isLiked = false; // After disliking, user cannot have liked the comment
 
-        return response()->noContent();
+        // Get the updated counts
+        $likesCount = $comment->likes()->count();
+        $dislikesCount = $comment->dislikes()->count();
+
+        // Prepare event data
+        $public = array_merge($public, [
+            'likes_count' => $likesCount,
+            'dislikes_count' => $dislikesCount,
+        ]);
+
+        $private = [
+            'is_liked_by_user' => $isLiked,
+            'is_disliked_by_user' => $isDisliked,
+            'user_id'=>$user->id,
+        ];
+
+        // Broadcast the updated data
+        broadcast(new CommentUpdated($public, $private));
+
+        // Return the updated data
+        return response(204);
     }
 }
