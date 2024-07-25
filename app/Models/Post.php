@@ -16,7 +16,7 @@ class Post extends Model
     protected $fillable = ['user_id', 'title', 'quote', 'author', 'source', 'status',];
 
 
-    protected $appends = ['is_liked_by_user', 'is_disliked_by_user', 'top_comments'];
+    protected $appends = ['is_liked_by_user', 'is_disliked_by_user',];
 
     public function user(): BelongsTo
     {
@@ -49,26 +49,19 @@ class Post extends Model
         if (!$user) {
             return false;
         }
-
-        return $this->likes()->where('user_id', $user->id)->exists();
+        return $this->relationLoaded('likes') 
+            ? $this->likes->contains('user_id', $user->id)
+            : $this->likes()->where('user_id', $user->id)->exists();
     }
 
     public function getIsDislikedByUserAttribute()
     {
-        $authUser = auth()->user();
-        if (!$authUser) {
+        $user = auth()->user();
+        if (!$user) {
             return false;
         }
-        return $this->dislikes()->where('user_id', $authUser->id)->exists();;
-    }
-
-    public function getTopCommentsAttribute()
-    {
-        return $this->comments()->withCount('likes as comment_likes_count')
-        ->having('comment_likes_count','>',0)
-            ->orderByDesc('comment_likes_count')
-            ->latest()
-            ->take(2)
-            ->get();
+        return $this->relationLoaded('dislikes')
+        ? $this->dislikes->contains('user_id',$user->id)
+        : $this->dislikes()->where('user_id',$user->id)->exists();
     }
 }
