@@ -18,7 +18,7 @@ class CommentUpdated implements ShouldBroadcastNow
     /**
      * Create a new event instance.
      */
-    public function __construct($public,$private)
+    public function __construct($public, $private = null)
     {
         //
         $this->private = $private;
@@ -36,5 +36,4 @@ class CommentUpdated implements ShouldBroadcastNow
             new Channel('comments'),
         ];
     }
-
 }
