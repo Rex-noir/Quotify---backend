@@ -90,10 +90,9 @@ class CommentController extends Controller
 
     public function replies(string $id)
     {
-        $replies = Comment::where('parent_id', $id)->with(['user'])->get();
-        foreach ($replies as $comment) {
-            $comment->replies_count = $comment->repliesCount();
-        }
+        $replies = Comment::where('parent_id', $id)
+        ->with(['user'])
+        ->withCount(['replies as replies_count','likes','dislikes'])->get();
         return response()->json($replies);
     }
 }
