@@ -19,30 +19,21 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required',
+        $credentials = $request->only('email', 'username', 'password');
+
+        // Determine if we're authenticating using an email or username
+        $fieldType = filter_var($credentials['email'] ?? '', FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
+
+        $request->validate([
+            $fieldType => 'required|string|exists:users,' . $fieldType,
+            'password' => 'required|string',
         ]);
 
-        if ($validator->fails()) {
-            $errors = $validator->errors()->messages();
-
-            if (isset($errors['email'])) {
-                $message = '"A man must enter email!" - Anon!';
-                return response(['message' => $message], 422);
-            }
-            if (isset($errors['password'])) {
-                $message = '"Forget not thou password!" - A';
-                return response(['message' => $message], 422);
-            }
-            return response($validator->errors(), 422);
-        }
-
-        if (Auth::attempt($request->only('email', 'password'))) {
+        if (Auth::attempt([$fieldType => $credentials[$fieldType], 'password' => $credentials['password']])) {
             $request->session()->regenerate();
-
-            return response()->noContent();
+            return response()->json(['message' => 'Login successful.']);
         }
-        return response(['message' => 'Invalid credentials.'], 401);
+
+        return response()->json(['message' => 'Invalid credentials.'], 401);
     }
 }
