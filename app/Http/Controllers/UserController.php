@@ -64,4 +64,22 @@ class UserController extends Controller
     {
         //
     }
+
+    public function search(Request $request)
+    {
+        $keyword = $request->input('keyword');
+        $limit = $request->input('limit', 10);
+
+        if (!empty($keyword)) {
+            $limit = is_numeric($limit) && $limit > 0 ? intval($limit) : 10;
+
+            $users = User::where('username', 'like', '%' . $keyword . '%')
+                ->take($limit)
+                ->get();
+        } else {
+            $users = collect();
+        }
+
+        return response()->json($users);
+    }
 }
