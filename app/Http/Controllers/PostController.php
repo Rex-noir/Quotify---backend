@@ -14,7 +14,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::with('user','likes','dislikes')
+        $posts = Post::with('user', 'likes', 'dislikes')
             ->withCount([
                 'likes',
                 'dislikes',
@@ -101,10 +101,13 @@ class PostController extends Controller
     {
 
         $comments = Comment::where([
-            'post_id' => $id, 
+            'post_id' => $id,
             'parent_id' => null
-        ])->with(['user',])
-            ->withCount(['likes', 'dislikes','replies'])
+        ])->with([
+            'user',
+            'mentions.user'
+        ])
+            ->withCount(['likes', 'dislikes', 'replies'])
             ->paginate(10);
 
         return $comments;
