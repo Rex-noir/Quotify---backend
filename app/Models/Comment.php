@@ -25,6 +25,11 @@ class Comment extends Model
         return $this->belongsTo(Post::class);
     }
 
+    public function mentions(): HasMany
+    {
+        return $this->hasMany(Mention::class);
+    }
+
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Comment::class, 'parent_id');
@@ -53,11 +58,11 @@ class Comment extends Model
         if (!$user) {
             return false;
         }
-        return $this->relationLoaded('likes') 
+        return $this->relationLoaded('likes')
             ? $this->likes->contains('user_id', $user->id)
             : $this->likes()->where('user_id', $user->id)->exists();
     }
-    
+
     public function getIsDislikedByUserAttribute()
     {
         $user = auth()->user();
@@ -65,8 +70,7 @@ class Comment extends Model
             return false;
         }
         return $this->relationLoaded('dislikes')
-        ? $this->dislikes->contains('user_id',$user->id)
-        : $this->dislikes()->where('user_id',$user->id)->exists();
+            ? $this->dislikes->contains('user_id', $user->id)
+            : $this->dislikes()->where('user_id', $user->id)->exists();
     }
-
 }
