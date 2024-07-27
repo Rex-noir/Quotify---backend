@@ -39,7 +39,10 @@ class CommentController extends Controller
         $validated = $request->validate([
             'content' => 'required',
             'post_id' => 'required|integer',
-            'parent_id' => 'integer|nullable'
+            'parent_id' => 'integer|nullable',
+            'mentions' => 'nullable|array',
+            'mentions.*.user_id' => 'required|integer|exists:users,id',
+            'mentions.*.username' => 'required|string'
         ]);
 
         $comment = Comment::create([
@@ -48,6 +51,17 @@ class CommentController extends Controller
             'parent_id' => $validated['parent_id'] ?? null,
             'user_id' => Auth::user()->id,
         ]);
+
+        if (!empty($validated['mentions'])) {
+            foreach ($validated['mentions'] as $mention) {
+                $comment->mentions()->create([
+                    'user_id' => $mention['user_id'],
+                    'username' => $mention['username'],
+                ]);
+            }
+        }
+
+        $comment->load('mentions');
 
         broadcast(new  CommentAdded($comment))->toOthers();
         return response(['comment' => $comment]);
@@ -59,7 +73,7 @@ class CommentController extends Controller
     public function show(string $id)
     {
         //
-        $comment = Comment::with(['user',])->findOrFail($id);
+        $comment = Comment::with(['user', 'mentions.user'])->findOrFail($id);
         $comment->replies_count = $comment->repliesCount();
         return $comment;
     }
@@ -91,8 +105,8 @@ class CommentController extends Controller
     public function replies(string $id)
     {
         $replies = Comment::where('parent_id', $id)
-        ->with(['user'])
-        ->withCount(['replies as replies_count','likes','dislikes'])->get();
+            ->with(['user'])
+            ->withCount(['replies as replies_count', 'likes', 'dislikes'])->get();
         return response()->json($replies);
     }
 }
