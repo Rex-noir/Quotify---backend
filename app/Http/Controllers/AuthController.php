@@ -30,7 +30,7 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt([$fieldType => $credentials[$fieldType], 'password' => $credentials['password']])) {
-            $request->session()->regenerate();
+            session()->regenerate();
             return response()->json(['message' => 'Login successful.']);
         }
 
